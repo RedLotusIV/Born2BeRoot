@@ -38,21 +38,42 @@ CpuL=$(mpstat -P ALL | awk '$3 == "all" {print 100 - $NF"%"}')
 
 #the who command shows you the users who are logged in, tr command to remove all letters, only letting the first field of the exact date, and the second field for the exact hour and minute
 Lrebo=$(who -b | tr -d "a-zA-Z" | awk '{print $1" "$2}')
-#
+
+# a function where it gets the output of lsblk with only the type and name of partiotions and looks for lvm there, -q in grep returns 1 or 0 in case of failure of finding what it was looking :
+#then the function runs whenever it is called inside the variable where itself is run whenever its value is printed by wall (broadcast to all users)
 function Lvmu {
-	if lsblk -o NAME,TYPE | grep -q 'lvm'; then
-		echo "yes"
-	else
-    		echo "no"
+        if lsblk -o NAME,TYPE | grep -q 'lvm'; then
+                echo "yes"
+        else
+                echo "no"
 fi
 }
 lvmUse=$(Lvmu)
+
+# cleanly output the ESTABLISHED connections by outputting the number of every line with ESTABLISHED on it
+tcp=$(netstat -nat | grep ESTABLISHED | wc -l)
+
+#print how many lines of users connected to the server
+Ulog=$(who | wc -l)
+
+#displays the ip address assosiated with the Hostname (used to connect with ssh to)
+IP=$(hostname -I)
+
+#printn the Mac adress cleanly.
+MAC=$(ip link show | grep ether | awk '{print $2}')
+
+#get from the journalctl the lines with COMMAND on them , then convert them to a number
+Su=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 wall "
-	#Architecture: $arch
-	#CPU Physical : $PhyC
-	#vCPU : $VirC
-	#Memory Usage: $Used/$Ram"Mb" ($Per%)
-	#Disk Usage: $Udis/$Tdis"Gb" ($Dus%) 
-	#CPU load: $CpuL
-	#Last boot: $Lrebo
-	#LVM use : $lvmUse"
+        #Architecture: $arch
+        #CPU Physical : $PhyC
+        #vCPU : $VirC
+        #Memory Usage: $Used/$Ram"Mb" ($Per%)
+        #Disk Usage: $Udis/$Tdis"Gb" ($Dus%) 
+        #CPU load: $CpuL
+        #Last boot: $Lrebo
+        #LVM use : $lvmUse
+        #Connections TCP : $tcp ESTABLISHED
+        #User log: $Ulog
+        #Network: IP $IP ($MAC)
+        #Sudo : $Su cmd"
