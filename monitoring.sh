@@ -36,12 +36,23 @@ Dus=$(df -Bm | grep "^/dev/" | grep -v "/boot" | awk '{used += $3} {total += $2}
 #the third field is all , calculate the load by subtracting the idle percentage from 100.
 CpuL=$(mpstat -P ALL | awk '$3 == "all" {print 100 - $NF"%"}')
 
+#the who command shows you the users who are logged in, tr command to remove all letters, only letting the first field of the exact date, and the second field for the exact hour and minute
+Lrebo=$(who -b | tr -d "a-zA-Z" | awk '{print $1" "$2}')
 #
-
+function Lvmu {
+	if lsblk -o NAME,TYPE | grep -q 'lvm'; then
+		echo "yes"
+	else
+    		echo "no"
+fi
+}
+lvmUse=$(Lvmu)
 wall "
 	#Architecture: $arch
 	#CPU Physical : $PhyC
 	#vCPU : $VirC
-	#Memory Usage : $Used/$Ram"Mb" ($Per%)
-	#Disk Usage = $Udis/$Tdis"Gb" ($Dus%) 
-	#CPU load : $CpuL"
+	#Memory Usage: $Used/$Ram"Mb" ($Per%)
+	#Disk Usage: $Udis/$Tdis"Gb" ($Dus%) 
+	#CPU load: $CpuL
+	#Last boot: $Lrebo
+	#LVM use : $lvmUse"
