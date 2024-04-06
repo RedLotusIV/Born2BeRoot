@@ -1,5 +1,3 @@
-### Born2BeRoot
-
 # The "Born2BeRoot" project from School 42 is a specific hands-on assignment or project that aims to teach students about Linux system administration and security practices. School 42, a renowned coding school with a unique pedagogical approach, often includes practical projects like Born2BeRoot to reinforce learning and skills development.
 
 Here are some key aspects and objectives typically associated with the Born2BeRoot project:
