@@ -51,6 +51,7 @@ fi
 lvmUse=$(Lvmu)
 
 # cleanly output the ESTABLISHED connections by outputting the number of every line with ESTABLISHED on it
+# it works by netsat command -n option to show numerical instead of hostnames, -a to output both listening and non-listening sockets, -t filter it so it only show TCP connections
 tcp=$(netstat -nat | grep ESTABLISHED | wc -l)
 
 #print how many lines of users connected to the server
