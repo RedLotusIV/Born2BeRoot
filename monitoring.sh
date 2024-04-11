@@ -21,16 +21,14 @@ Used=$(free -m | grep "Mem" | tr -s " " | cut -d " " -f 3 )
 #by dividing the total by used and multiply by 100 according to the percentage formula
 Per=$(free | awk '$1 == "Mem:" {printf("%.2f"), $3/$2*100}')
 
-#grep only the dev/ partitions, dont count boot, then make a variable where you add to it
-#all the sizes of partitions and print it 
-Tdis=$(df -Bg | grep "^/dev/" | grep -v "/boot" | awk '{total += $2} END {print total}')
+# print the column of the total of the disk partitions where the first column is total, and subtract from what you'll print G, for the Gb in the command output , in the end, print
+Tdis=$(df -h --total | awk '$1 == "total" {sub("G", "", $2)}; END {print $2}')
 
-#same as the variable before, but with second field instead
-Udis=$(df -Bm | grep "^/dev/" | grep -v "/boot" | awk '{used += $3} END {print used}')
+# print the column of the used where the first column is total
+Udis=$(df -m --total | awk '$1 == "total" {print $3}')
 
-#calculate the percentage and printing it, END is used so you print only after the variables
-# were calculated already 
-Dus=$(df -Bm | grep "^/dev/" | grep -v "/boot" | awk '{used += $3} {total += $2} END {printf ("%d"), used/total*100}')
+# print the column of the percentage where first column is total
+Dus=$(df -h --total | awk '$1 == "total" {print $5}')
 
 #mpstat shows the stat of CPUS , -P ALL to show the stats of all CPUS at once, awk to match where
 #the third field is all , calculate the load by subtracting the idle percentage from 100.
@@ -42,16 +40,15 @@ Lrebo=$(who -b | tr -d "a-zA-Z" | awk '{print $1" "$2}')
 # a function where it gets the output of lsblk with only the type and name of partiotions and looks for lvm there, -q in grep returns 1 or 0 in case of failure of finding what it was looking :
 #then the function runs whenever it is called inside the variable where itself is run whenever its value is printed by wall (broadcast to all users)
 function Lvmu {
-        if lsblk -o NAME,TYPE | grep -q 'lvm'; then
-                echo "yes"
-        else
-                echo "no"
+	if lsblk -o NAME,TYPE | grep -q 'lvm'; then
+		echo "yes"
+	else
+    		echo "no"
 fi
 }
 lvmUse=$(Lvmu)
 
 # cleanly output the ESTABLISHED connections by outputting the number of every line with ESTABLISHED on it
-# it works by netsat command -n option to show numerical instead of hostnames, -a to output both listening and non-listening sockets, -t filter it so it only show TCP connections
 tcp=$(netstat -nat | grep ESTABLISHED | wc -l)
 
 #print how many lines of users connected to the server
@@ -66,15 +63,15 @@ MAC=$(ip link show | grep ether | awk '{print $2}')
 #get from the journalctl the lines with COMMAND on them , then convert them to a number
 Su=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
 wall "
-        #Architecture: $arch
-        #CPU Physical : $PhyC
-        #vCPU : $VirC
-        #Memory Usage: $Used/$Ram"Mb" ($Per%)
-        #Disk Usage: $Udis/$Tdis"Gb" ($Dus%) 
-        #CPU load: $CpuL
-        #Last boot: $Lrebo
-        #LVM use : $lvmUse
-        #Connections TCP : $tcp ESTABLISHED
-        #User log: $Ulog
-        #Network: IP $IP ($MAC)
-        #Sudo : $Su cmd"
+	#Architecture: $arch
+	#CPU Physical : $PhyC
+	#vCPU : $VirC
+	#Memory Usage: $Used/$Ram"Mb" ($Per%)
+	#Disk Usage: $Udis/$Tdis"Gb" ($Dus) 
+	#CPU load: $CpuL
+	#Last boot: $Lrebo
+	#LVM use : $lvmUse
+	#Connections TCP : $tcp ESTABLISHED
+	#User log: $Ulog
+	#Network: IP $IP ($MAC)
+	#Sudo : $Su cmd"
