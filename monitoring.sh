@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#print the architecture
 arch=$(uname -a)
 
 #print the cpu info , grep the cpu socket line, but then delete any letter and show only the number
